@@ -3323,6 +3323,25 @@ html[data-theme="light"] .pig-ai .bd b,html[data-theme="light"] .pig-metric .v{c
 @media(max-width:1180px){.pig-body{grid-template-columns:0 minmax(0,1fr) 300px}.pig-left{display:none}}
 @media (prefers-reduced-motion: reduce){.pig-node{transition:opacity .3s}.pig-edge.flow{animation:none}}
 </style>
+<style id="niy-pig-2">
+/* Gotham-style: pan/zoom viewport, toolbar, bottom policy timeline */
+#detail .pig-canvas{display:flex;flex-direction:column}
+.pig-graph{position:relative;flex:1;min-height:0;overflow:hidden}
+.pig-graph svg{width:100%;height:100%;display:block;cursor:grab}
+.pig-graph svg:active{cursor:grabbing}
+.pig-toolbar{position:absolute;top:12px;left:14px;display:flex;flex-direction:column;gap:6px;z-index:4}
+.pig-toolbar button{width:30px;height:30px;border-radius:8px;background:var(--panel-2);border:1px solid var(--line);color:var(--fg-dim);cursor:pointer;font-size:15px;line-height:1;display:grid;place-items:center;font-family:var(--font-mono)}
+.pig-toolbar button:hover{border-color:#7A9254;color:#A4C76D}
+.pig-timeline{flex:0 0 98px;border-top:1px solid var(--line);padding:9px 18px 7px;user-select:none;background:var(--panel)}
+.pig-tl-head{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.1em;color:var(--fg-faint);text-transform:uppercase;padding:0 0 5px}
+#pigTlLabel{color:#F3785E;letter-spacing:.04em}
+.pig-tl-bars{position:relative;height:48px;display:flex;align-items:flex-end;gap:1px;cursor:crosshair}
+.pig-tl-bar{flex:1;background:linear-gradient(180deg,#647C3C,#3a4a24);border-radius:1px 1px 0 0;min-height:2px;opacity:.5;transition:opacity .12s,background .12s}
+.pig-tl-bar:hover{opacity:.85}
+.pig-tl-bar.in{opacity:1;background:linear-gradient(180deg,#F3785E,#a8412a)}
+.pig-tl-sel{position:absolute;top:0;bottom:0;background:rgba(243,120,94,.1);border-left:1.5px solid #F3785E;border-right:1.5px solid #F3785E;pointer-events:none}
+.pig-tl-axis{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:9px;color:var(--fg-faint);padding-top:3px}
+</style>
 </head>
 <body class="locked">
 
@@ -6093,7 +6112,7 @@ function renderAffidavitPanel(analysis, rawRow) {
 }
 
   /* ============ POLICY INTELLIGENCE GRAPH (real bill data + Groq) ============ */
-  var __niyPig = { built: false, model: null, expanded: null, selected: null, query: '', stage: '', els: null, ai: {} };
+  var __niyPig = { built: false, model: null, expanded: null, selected: null, query: '', stage: '', els: null, ai: {}, yearRange: null };
   // 14 real policy domains (tagged across bills) -> India's 3 economic sectors.
   // Every bill carries a real ministry 'sector' in the CSV; classify all 71 into
   // ~16 clean domains under India's 3 economic sectors (real mapping, no invention).
@@ -6186,7 +6205,7 @@ function renderAffidavitPanel(analysis, rawRow) {
     var m = __niyPig.model, n = m.nodes[id]; if (!n) return [];
     if (n.level === 0) return m.sectorIds;
     if (n.level === 1) return __niyPig.expanded.has(id) ? n.children : [];
-    if (n.level === 2) return __niyPig.expanded.has(id) ? n.children.slice(0, PIG_MAX_BILLS) : [];
+    if (n.level === 2) { if (!__niyPig.expanded.has(id)) return []; var ch = n.children; var yr = __niyPig.yearRange; if (yr) ch = ch.filter(function (c) { var yy = pigYearOf(__niyPig.model.nodes[c]); return yy >= yr[0] && yy <= yr[1]; }); return ch.slice(0, PIG_MAX_BILLS); }
     return [];
   }
   function pigWeight(id) { var ch = pigVisibleChildren(id); if (!ch.length) return 1; return ch.reduce(function (s, c) { return s + pigWeight(c); }, 0); }
@@ -6365,6 +6384,51 @@ function renderAffidavitPanel(analysis, rawRow) {
     });
   }
 
+  function pigYearOf(n) { var m = /(\d{4})/.exec((n && n.raw && n.raw.date_introduced) || ''); return m ? +m[1] : 0; }
+  function pigBuildTimeline() {
+    var host = document.getElementById('pigTimeline'); if (!host) return;
+    var bills = Object.keys(__niyPig.model.nodes).map(function (k) { return __niyPig.model.nodes[k]; }).filter(function (n) { return n.level === 3; });
+    var counts = {}, min = 9999, max = 0;
+    bills.forEach(function (b) { var y = pigYearOf(b); if (y < 1900) return; counts[y] = (counts[y] || 0) + 1; if (y < min) min = y; if (y > max) max = y; });
+    if (max < min) { host.style.display = 'none'; return; }
+    host.style.display = '';
+    var years = []; for (var y = min; y <= max; y++) years.push(y);
+    var maxC = Math.max.apply(null, years.map(function (y) { return counts[y] || 0; })) || 1;
+    var bars = years.map(function (y) { var hh = Math.round((counts[y] || 0) / maxC * 100); return '<div class="pig-tl-bar" data-y="' + y + '" title="' + y + ': ' + (counts[y] || 0) + ' bills" style="height:' + Math.max(2, hh) + '%"></div>'; }).join('');
+    host.innerHTML = '<div class="pig-tl-head"><span>Bills introduced by year \u2014 drag to filter</span><span id="pigTlLabel">' + min + '\u2013' + max + ' \u00b7 all years</span></div>'
+      + '<div class="pig-tl-bars" id="pigTlBars">' + bars + '<div class="pig-tl-sel" id="pigTlSel" style="display:none"></div></div>'
+      + '<div class="pig-tl-axis"><span>' + min + '</span><span>' + Math.round((min + max) / 2) + '</span><span>' + max + '</span></div>';
+    var barsEl = document.getElementById('pigTlBars'), sel = document.getElementById('pigTlSel'), lbl = document.getElementById('pigTlLabel');
+    var n = years.length, dragging = false, moved = false, aIdx = 0;
+    function idxAt(cx) { var r = barsEl.getBoundingClientRect(); return Math.max(0, Math.min(n - 1, Math.floor((cx - r.left) / r.width * n))); }
+    function paint(i0, i1) {
+      var lo = Math.min(i0, i1), hi = Math.max(i0, i1);
+      sel.style.display = 'block'; sel.style.left = (lo / n * 100) + '%'; sel.style.width = ((hi - lo + 1) / n * 100) + '%';
+      [].forEach.call(barsEl.querySelectorAll('.pig-tl-bar'), function (b, k) { b.classList.toggle('in', k >= lo && k <= hi); });
+      __niyPig.yearRange = [years[lo], years[hi]]; lbl.textContent = years[lo] + '\u2013' + years[hi] + ' \u00b7 filtered';
+    }
+    barsEl.addEventListener('pointerdown', function (e) { dragging = true; moved = false; aIdx = idxAt(e.clientX); try { barsEl.setPointerCapture(e.pointerId); } catch (x) {} paint(aIdx, aIdx); });
+    barsEl.addEventListener('pointermove', function (e) { if (!dragging) return; moved = true; paint(aIdx, idxAt(e.clientX)); });
+    barsEl.addEventListener('pointerup', function (e) {
+      if (!dragging) return; dragging = false;
+      if (!moved) { __niyPig.yearRange = null; sel.style.display = 'none'; [].forEach.call(barsEl.querySelectorAll('.pig-tl-bar'), function (x) { x.classList.remove('in'); }); lbl.textContent = min + '\u2013' + max + ' \u00b7 all years'; }
+      pigRenderGraph(); if (__niyPig.selected) pigRenderPanel(__niyPig.selected);
+    });
+  }
+  function pigInitPanZoom() {
+    var svg = document.getElementById('pigSvg'), vp = document.getElementById('pigViewport'); if (!svg || !vp) return;
+    var k = 1, x = 0, y = 0, drag = false, sx = 0, sy = 0;
+    function apply() { vp.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ') scale(' + k.toFixed(3) + ')'); }
+    function zoomAt(cx, cy, f) { var nk = Math.max(0.45, Math.min(4, k * f)); var r = svg.getBoundingClientRect(); var mx = (cx - r.left) / r.width * 1000, my = (cy - r.top) / r.height * 724; x = mx - (mx - x) * (nk / k); y = my - (my - y) * (nk / k); k = nk; apply(); }
+    svg.addEventListener('wheel', function (e) { e.preventDefault(); zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.12 : 0.9); }, { passive: false });
+    svg.addEventListener('pointerdown', function (e) { if (e.target.closest && e.target.closest('.pig-node')) return; drag = true; sx = e.clientX; sy = e.clientY; try { svg.setPointerCapture(e.pointerId); } catch (x2) {} });
+    svg.addEventListener('pointermove', function (e) { if (!drag) return; var r = svg.getBoundingClientRect(); x += (e.clientX - sx) / r.width * 1000; y += (e.clientY - sy) / r.height * 724; sx = e.clientX; sy = e.clientY; apply(); });
+    svg.addEventListener('pointerup', function () { drag = false; });
+    svg.addEventListener('pointercancel', function () { drag = false; });
+    var tb = document.getElementById('pigToolbar');
+    if (tb) tb.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; var r = svg.getBoundingClientRect(); if (b.dataset.z === 'in') zoomAt(r.left + r.width / 2, r.top + r.height / 2, 1.25); else if (b.dataset.z === 'out') zoomAt(r.left + r.width / 2, r.top + r.height / 2, 0.8); else { k = 1; x = 0; y = 0; apply(); } });
+  }
+
   function niyMountPolicyGraph() {
     var feats = (typeof featuresForTier === 'function') ? featuresForTier(activeTier) : [];
     var f = feats && feats[activeIndex];
@@ -6383,12 +6447,12 @@ function renderAffidavitPanel(analysis, rawRow) {
       + '<button class="pig-chip" id="pigReset">Reset view</button></div>'
       + '<div class="pig-body">'
       + '<div class="pig-left"><div class="pig-rail-h">Economic sectors</div><div id="pigSecCards"></div></div>'
-      + '<div class="pig-canvas"><svg id="pigSvg" viewBox="0 0 1000 724" preserveAspectRatio="xMidYMid meet">'
+      + '<div class="pig-canvas"><div class="pig-graph"><svg id="pigSvg" viewBox="0 0 1000 724" preserveAspectRatio="xMidYMid meet">'
       + '<defs><radialGradient id="pigIndia" cx="40%" cy="35%"><stop offset="0%" stop-color="#8a6a2e"/><stop offset="100%" stop-color="#4a3a1a"/></radialGradient></defs>'
-      + '<g id="pigEdges"></g><g id="pigNodes"></g></svg>'
+      + '<g id="pigViewport"><g id="pigEdges"></g><g id="pigNodes"></g></g></svg>' + '<div class="pig-toolbar" id="pigToolbar"><button type="button" data-z="in" title="Zoom in">+</button><button type="button" data-z="out" title="Zoom out">\u2212</button><button type="button" data-z="reset" title="Reset view">\u2921</button></div>'
       + '<div class="pig-hint">Click a node to expand · select for AI briefing</div>'
       + '<div class="pig-legend"><span><i style="background:#647C3C"></i>likely / passed</span><span><i style="background:#B18A42"></i>uncertain</span><span><i style="background:#982F2F"></i>unlikely / dead</span></div>'
-      + '</div>'
+      + '</div><div class="pig-timeline" id="pigTimeline"></div></div>'
       + '<div class="pig-right" id="pigRight"></div>'
       + '</div></div>';
     // sector cards
@@ -6403,7 +6467,7 @@ function renderAffidavitPanel(analysis, rawRow) {
     qi.addEventListener('input', function () { __niyPig.query = qi.value.trim(); pigRenderGraph(); });
     document.getElementById('pigReset').addEventListener('click', function () { __niyPig.expanded = new Set(); __niyPig.selected = null; __niyPig.query = ''; qi.value = ''; pigRenderGraph(); pigPanelEmpty(); pigSyncSectorCards(); });
     document.getElementById('pigSvg').addEventListener('click', function () { /* background: keep selection */ });
-    pigRenderGraph(); pigPanelEmpty(); pigSyncSectorCards();
+    pigRenderGraph(); pigPanelEmpty(); pigSyncSectorCards(); pigBuildTimeline(); pigInitPanZoom();
   }
 
 
