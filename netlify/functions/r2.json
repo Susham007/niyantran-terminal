@@ -1,0 +1,145 @@
+{
+    "created": 1495709716,
+    "updated": 1781162997,
+    "title": "Registrars of Companies (RoC)-wise Company Master Data",
+    "desc": "Registrars of Companies (RoC)-wise Company Master Data",
+    "source": "data.gov.in",
+    "org_type": "Central",
+    "org": [
+        "Ministry of Corporate Affairs"
+    ],
+    "sector": [
+        "Companies"
+    ],
+    "visualizable": "1",
+    "index_name": "4dbe5667-7b6b-41d7-82af-211562424d9a",
+    "catalog_uuid": "ec58dab7-d891-4abb-936e-d5d274a6ce9b",
+    "status": "ok",
+    "field": [
+        {
+            "name": "CIN",
+            "id": "CIN",
+            "type": "keyword"
+        },
+        {
+            "name": "CompanyName",
+            "id": "CompanyName",
+            "type": "keyword"
+        },
+        {
+            "name": "CompanyROCcode",
+            "id": "CompanyROCcode",
+            "type": "keyword"
+        },
+        {
+            "name": "CompanyCategory",
+            "id": "CompanyCategory",
+            "type": "keyword"
+        },
+        {
+            "name": "CompanySubCategory",
+            "id": "CompanySubCategory",
+            "type": "keyword"
+        },
+        {
+            "name": "CompanyClass",
+            "id": "CompanyClass",
+            "type": "keyword"
+        },
+        {
+            "name": "AuthorizedCapital",
+            "id": "AuthorizedCapital",
+            "type": "keyword"
+        },
+        {
+            "name": "PaidupCapital",
+            "id": "PaidupCapital",
+            "type": "keyword"
+        },
+        {
+            "name": "CompanyRegistrationdate_date",
+            "id": "CompanyRegistrationdate_date",
+            "type": "keyword"
+        },
+        {
+            "name": "Registered_Office_Address",
+            "id": "Registered_Office_Address",
+            "type": "keyword"
+        },
+        {
+            "name": "Listingstatus",
+            "id": "Listingstatus",
+            "type": "keyword"
+        },
+        {
+            "name": "CompanyStatus",
+            "id": "CompanyStatus",
+            "type": "keyword"
+        },
+        {
+            "name": "CompanyStateCode",
+            "id": "CompanyStateCode",
+            "type": "keyword"
+        },
+        {
+            "name": "CompanyIndian\/Foreign Company",
+            "id": "CompanyIndian\/Foreign Company",
+            "type": "keyword"
+        },
+        {
+            "name": "nic_code",
+            "id": "nic_code",
+            "type": "keyword"
+        },
+        {
+            "name": "CompanyIndustrialClassification",
+            "id": "CompanyIndustrialClassification",
+            "type": "keyword"
+        }
+    ],
+    "created_date": "2017-05-25T16:25:16Z",
+    "updated_date": "2026-06-11T07:29:57Z",
+    "active": "1",
+    "external_ws_url": "",
+    "external_ws": "0",
+    "target_bucket": {
+        "index": "mca_final",
+        "type": "ec58dab7-d891-4abb-936e-d5d274a6ce9b"
+    },
+    "field_exposed": [
+        {
+            "name": "Company State Code",
+            "id": "CompanyStateCode",
+            "type": "keyword",
+            "mandatory": true
+        }
+    ],
+    "aggregation": [],
+    "field_dependent": [],
+    "message": "Resource lists",
+    "version": "2.2.0",
+    "total": 1,
+    "count": 1,
+    "limit": "3",
+    "offset": "0",
+    "records": [
+        {
+            "CIN": "L85110KA1981PLC013115",
+            "CompanyName": "INFOSYS LIMITED",
+            "CompanyROCcode": "ROC Bangalore",
+            "CompanyCategory": "Company limited by shares",
+            "CompanySubCategory": "Non-government company",
+            "CompanyClass": "Public",
+            "AuthorizedCapital": "24000000000.00",
+            "PaidupCapital": "20278293815.00",
+            "CompanyRegistrationdate_date": "1981-07-02",
+            "Registered_Office_Address": "ELECTRONICS CITY,HOSUR ROAD,   BANGALORE,KARNATAKA,Karnataka,560100-India",
+            "Listingstatus": "Listed",
+            "CompanyStatus": "Active",
+            "CompanyStateCode": "karnataka",
+            "CompanyIndian\/Foreign Company": "India",
+            "nic_code": "85110",
+            "CompanyIndustrialClassification": "Community, personal and Social Services"
+        }
+    ]
+}

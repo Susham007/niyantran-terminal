@@ -1,0 +1,18 @@
+# dependencies
+node_modules/
+
+# secrets — NEVER commit real keys (Netlify env vars only)
+.env
+.env.*
+!.env.example
+
+# Netlify local
+.netlify/
+
+# NOTE: niyantran-hero.mp4 (login video, ~9 MB) IS committed — a git-based
+# Netlify deploy serves only what's in the repo, so it must be included.
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log

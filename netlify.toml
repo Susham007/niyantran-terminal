@@ -1,0 +1,23 @@
+# Niyantran Terminal — Netlify config
+# Serves the terminal (index.html) + admin dashboard (/admin) as static files,
+# and the /api/* functions: askai (FREE AI: Groq->Gemini), admin (agent control),
+# and the live/on-demand proxies. Autonomous data agents run separately via
+# GitHub Actions (.github/workflows/agents.yml) and commit data/ snapshots.
+# Deploy this whole FOLDER, or connect the repo to Netlify.
+# Required env vars (Site -> Environment): GROQ_API_KEY, GEMINI_API_KEY,
+# ADMIN_TOKEN  (+ optional GITHUB_TOKEN, GITHUB_REPO, DATA_GOV_KEY). See .env.example.
+
+[build]
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# The app calls /api/* (so the same build works on Cloudflare too); on Netlify
+# proxy those to the functions.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true

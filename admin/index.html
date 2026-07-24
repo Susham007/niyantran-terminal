@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Niyantran · Agent Control</title>
+<style>
+  :root{
+    --bg:#0B0F0D; --panel:#161B18; --panel2:#1D241D; --card:#232B27; --line:#414C45;
+    --fg:#E6EAE5; --dim:#A7AEA7; --faint:#747C76;
+    --grad:linear-gradient(120deg,#FF7A80,#F3785E 45%,#E8874F 75%,#F5A95C);
+    --ok:#72C36B; --warn:#B18A42; --bad:#982F2F;
+    --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+    --ui:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--ui);-webkit-font-smoothing:antialiased}
+  a{color:#F3785E}
+  header{display:flex;align-items:center;gap:14px;padding:18px 26px;border-bottom:1px solid var(--line);background:var(--panel)}
+  header .mark{width:34px;height:34px;border-radius:8px;background:var(--grad);display:grid;place-items:center;font-family:var(--mono);font-weight:800;color:#1a120f}
+  header h1{margin:0;font-size:15px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+  header .sub{color:var(--faint);font-size:11px;letter-spacing:.1em;font-family:var(--mono)}
+  header .right{margin-left:auto;display:flex;gap:10px;align-items:center}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 26px 60px}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--fg);font-family:var(--ui);font-size:12.5px;font-weight:600;padding:9px 15px;border-radius:9px;cursor:pointer}
+  .btn:hover{border-color:#7A9254}
+  .btn.p{background:var(--grad);color:#1a120f;border:0}
+  .btn:disabled{opacity:.5;cursor:default}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+  .h{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);font-weight:700;margin:26px 0 12px;display:flex;align-items:center;gap:10px}
+  .h::after{content:"";flex:1;height:1px;background:var(--line)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+  .agent{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .agent .top{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+  .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .dot.ok{background:var(--ok);box-shadow:0 0 8px rgba(114,195,107,.6)}
+  .dot.stale{background:var(--warn)}
+  .dot.bad{background:var(--bad)}
+  .agent .name{font-weight:650;font-size:14px}
+  .agent .id{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-left:auto}
+  .kv{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(65,76,69,.4)}
+  .kv:last-child{border-bottom:0}
+  .kv .k{color:var(--dim)}
+  .kv .v{font-family:var(--mono);color:var(--fg)}
+  .kv .v.err{color:#E58A86;font-family:var(--ui);text-align:right;max-width:60%}
+  .stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:150px}
+  .stat .l{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+  .stat .n{font-family:var(--mono);font-size:22px;font-weight:700;margin-top:5px}
+  .stat .n.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .pill{font-family:var(--mono);font-size:10.5px;padding:3px 9px;border-radius:999px;border:1px solid var(--line)}
+  .pill.on{color:var(--ok);border-color:rgba(114,195,107,.5)}
+  .pill.off{color:#E58A86;border-color:rgba(152,47,47,.5)}
+  #gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:10}
+  #gate .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:30px 32px;width:min(400px,90vw);text-align:center}
+  #gate .mark{width:48px;height:48px;border-radius:12px;background:var(--grad);margin:0 auto 16px;display:grid;place-items:center;font-family:var(--mono);font-weight:800;font-size:20px;color:#1a120f}
+  #gate input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--fg);padding:11px 13px;font-family:var(--mono);margin:14px 0;font-size:13px}
+  #gate .err{color:#E58A86;font-size:12px;min-height:16px}
+  .muted{color:var(--faint);font-size:11.5px;font-family:var(--mono)}
+  .toast{position:fixed;bottom:22px;right:22px;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--ok);border-radius:10px;padding:13px 17px;font-size:12.5px;max-width:360px;box-shadow:0 14px 40px rgba(0,0,0,.5);opacity:0;transform:translateY(8px);transition:.25s}
+  .toast.show{opacity:1;transform:none}
+  .toast.bad{border-left-color:var(--bad)}
+</style>
+</head>
+<body>
+<div id="gate">
+  <div class="box">
+    <div class="mark">T</div>
+    <div style="font-weight:700;letter-spacing:.1em">AGENT CONTROL</div>
+    <div class="muted" style="margin-top:6px">Enter the admin token</div>
+    <input id="tok" type="password" placeholder="ADMIN_TOKEN" autocomplete="off" />
+    <div class="err" id="gateErr"></div>
+    <button class="btn p" style="width:100%" onclick="unlock()">Unlock</button>
+  </div>
+</div>
+
+<header style="display:none" id="hdr">
+  <div class="mark">T</div>
+  <div>
+    <h1>Niyantran · Agent Control</h1>
+    <div class="sub">autonomous data backend</div>
+  </div>
+  <div class="right">
+    <span class="muted" id="clock"></span>
+    <button class="btn" onclick="refresh()">↻ Refresh</button>
+    <button class="btn p" onclick="runAll()">▶ Run all now</button>
+  </div>
+</header>
+
+<div class="wrap" id="main" style="display:none">
+  <div class="row" id="stats"></div>
+
+  <div class="h">Data agents <span class="muted" style="letter-spacing:0" id="feedCount"></span></div>
+  <div class="grid" id="agents"></div>
+
+  <div class="h">Engine &amp; environment</div>
+  <div class="grid" id="envgrid"></div>
+
+  <div class="h">Live feeds (on-demand, not batched)</div>
+  <div class="muted" style="line-height:1.7">
+    Ships (AIS) and Aircraft (OpenSky) are genuinely real-time — a 6-hour-old position is meaningless, so they are
+    <b style="color:var(--dim)">not agents</b>. They stay on-demand via <code>/api/ais</code>, <code>/api/air</code>,
+    <code>/api/vessels</code>, fetched only when a user opens that panel.
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let TOKEN = sessionStorage.getItem('niyAdminTok') || '';
+  const $ = s => document.querySelector(s);
+  const ago = iso => {
+    if (!iso) return 'never';
+    const s = (Date.now() - Date.parse(iso)) / 1000;
+    if (s < 90) return Math.round(s) + 's ago';
+    if (s < 5400) return Math.round(s / 60) + 'm ago';
+    if (s < 172800) return Math.round(s / 3600) + 'h ago';
+    return Math.round(s / 86400) + 'd ago';
+  };
+  const nextRun = () => {
+    const d = new Date(); const h = d.getUTCHours();
+    const nh = (Math.floor(h / 6) + 1) * 6;
+    const n = new Date(d); n.setUTCHours(nh, 0, 0, 0);
+    const mins = Math.max(0, Math.round((n - d) / 60000));
+    return mins >= 60 ? Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm' : mins + 'm';
+  };
+  function toast(msg, bad) { const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (bad ? ' bad' : ''); setTimeout(() => t.className = 'toast', 4200); }
+
+  async function api(action, opts = {}) {
+    const init = { headers: { 'x-admin-token': TOKEN } };
+    if (opts.post) { init.method = 'POST'; init.headers['Content-Type'] = 'application/json'; init.body = JSON.stringify(Object.assign({ action }, opts.body || {})); }
+    const r = await fetch('/api/admin' + (opts.post ? '' : '?action=' + action), init);
+    return { status: r.status, data: await r.json().catch(() => ({})) };
+  }
+
+  async function unlock() {
+    TOKEN = $('#tok').value.trim();
+    if (!TOKEN) return;
+    const { status, data } = await api('health');
+    if (status === 200) { sessionStorage.setItem('niyAdminTok', TOKEN); $('#gate').style.display = 'none'; $('#hdr').style.display = 'flex'; $('#main').style.display = 'block'; render(data); startClock(); }
+    else $('#gateErr').textContent = data.error || ('Error ' + status);
+  }
+
+  function render(d) {
+    const m = d.manifest || {}; const feeds = m.feeds || {};
+    const ids = Object.keys(feeds);
+    const okN = ids.filter(k => feeds[k].ok).length;
+    const totalRows = ids.reduce((s, k) => s + (feeds[k].count || 0), 0);
+
+    $('#stats').innerHTML = [
+      ['Agents healthy', okN + ' / ' + ids.length, okN === ids.length],
+      ['Rows cached', totalRows.toLocaleString(), true, true],
+      ['Last agent run', ago(m.updated), true],
+      ['Next run', 'in ' + nextRun(), true],
+      ['AI engine', d.ai && d.ai.configured ? 'online' : 'off', d.ai && d.ai.configured],
+    ].map(([l, n, ok, grad]) => `<div class="stat"><div class="l">${l}</div><div class="n ${grad ? 'grad' : ''}" style="${ok === false ? 'color:#E58A86' : ''}">${n}</div></div>`).join('');
+
+    $('#feedCount').textContent = m.summary ? `· ${m.summary.ok}/${m.summary.total} ok this run` : '';
+    $('#agents').innerHTML = ids.map(k => {
+      const f = feeds[k];
+      const staleMs = f.updated ? Date.now() - Date.parse(f.updated) : Infinity;
+      const cls = f.ok ? (staleMs > 8 * 3600e3 ? 'stale' : 'ok') : 'bad';
+      const state = f.ok ? (cls === 'stale' ? 'stale' : 'healthy') : 'failed';
+      return `<div class="agent">
+        <div class="top"><span class="dot ${cls}"></span><span class="name">${f.label || k}</span><span class="id">${k}</span></div>
+        <div class="kv"><span class="k">Status</span><span class="v" style="color:${cls === 'ok' ? 'var(--ok)' : cls === 'stale' ? 'var(--warn)' : '#E58A86'}">${state}</span></div>
+        <div class="kv"><span class="k">Rows</span><span class="v">${(f.count || 0).toLocaleString()}</span></div>
+        <div class="kv"><span class="k">Last run</span><span class="v">${ago(f.updated)}</span></div>
+        <div class="kv"><span class="k">Duration</span><span class="v">${f.ms != null ? f.ms + 'ms' : '—'}</span></div>
+        ${f.source ? `<div class="kv"><span class="k">Source</span><span class="v" style="font-size:10px;max-width:60%;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.source}</span></div>` : ''}
+        ${f.error ? `<div class="kv"><span class="k">Error</span><span class="v err">${f.error}</span></div>` : ''}
+        <div style="margin-top:11px;display:flex;gap:8px">
+          <button class="btn" onclick="runOne('${k}')">▶ Run</button>
+          <a class="btn" href="/data/${k}.json" target="_blank" style="text-decoration:none">View JSON</a>
+        </div>
+      </div>`;
+    }).join('') || '<div class="muted">No agents have run yet. Hit “Run all now”.</div>';
+
+    const env = d.env || {};
+    const kv = [
+      ['GROQ_API_KEY', env.GROQ_API_KEY], ['GEMINI_API_KEY', env.GEMINI_API_KEY],
+      ['GITHUB_TOKEN', env.GITHUB_TOKEN], ['GITHUB_REPO', !!env.GITHUB_REPO],
+      ['DATA_GOV_KEY', env.DATA_GOV_KEY], ['ADMIN_TOKEN', env.ADMIN_TOKEN],
+    ];
+    $('#envgrid').innerHTML = `
+      <div class="agent">
+        <div class="top"><span class="name">AI engine</span></div>
+        <div class="kv"><span class="k">Primary</span><span class="v">${(d.ai && d.ai.primary) || '—'}</span></div>
+        <div class="kv"><span class="k">Fallback</span><span class="v">${(d.ai && d.ai.fallback) || '—'}</span></div>
+        <div style="margin-top:11px"><button class="btn p" onclick="pingAI(this)">Test AI now</button> <span id="aiRes" class="muted"></span></div>
+      </div>
+      <div class="agent">
+        <div class="top"><span class="name">Environment secrets</span></div>
+        ${kv.map(([k, on]) => `<div class="kv"><span class="k">${k}</span><span class="pill ${on ? 'on' : 'off'}">${on ? 'set' : 'missing'}</span></div>`).join('')}
+      </div>
+      <div class="agent">
+        <div class="top"><span class="name">Schedule</span></div>
+        <div class="kv"><span class="k">Cadence</span><span class="v">every 6h</span></div>
+        <div class="kv"><span class="k">Cron</span><span class="v">0 */6 * * *</span></div>
+        <div class="kv"><span class="k">Runner</span><span class="v">GitHub Actions</span></div>
+        <div class="kv"><span class="k">Next</span><span class="v">in ${nextRun()}</span></div>
+      </div>`;
+  }
+
+  async function refresh() { const { data } = await api('health'); render(data); }
+  async function runAll() { fire(''); }
+  async function runOne(feed) { fire(feed); }
+  async function fire(feed) {
+    toast('Dispatching ' + (feed || 'all feeds') + '…');
+    const { data } = await api('trigger', { post: true, body: { feed } });
+    toast(data.ok ? data.message : (data.error || 'Trigger failed'), !data.ok);
+  }
+  async function pingAI(btn) {
+    btn.disabled = true; $('#aiRes').textContent = 'pinging…';
+    const { data } = await api('aiping', { post: true });
+    $('#aiRes').textContent = data.ok ? ('✓ ' + data.engine + ': “' + data.sample + '”') : ('✗ ' + (data.error || 'failed'));
+    $('#aiRes').style.color = data.ok ? 'var(--ok)' : '#E58A86';
+    btn.disabled = false;
+  }
+  function startClock() {
+    setInterval(() => { $('#clock').textContent = new Date().toISOString().replace('T', ' ').slice(0, 19) + 'Z'; }, 1000);
+    setInterval(refresh, 30000);
+  }
+
+  if (TOKEN) unlock();
+  $('#tok').addEventListener('keydown', e => { if (e.key === 'Enter') unlock(); });
+</script>
+</body>
+</html>

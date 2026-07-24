@@ -1,0 +1,16 @@
+{
+  "name": "niyantran-terminal",
+  "version": "1.0.0",
+  "description": "Autonomous, open-source governance & geopolitics intelligence terminal — free AI (Groq/Gemini), agent-scraped live feeds, single-file frontend.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "agents": "node scrapers/run-all.mjs",
+    "agent": "node scrapers/run-all.mjs",
+    "dev": "netlify dev",
+    "start": "netlify dev"
+  },
+  "dependencies": {}
+}
