@@ -1,22 +1,21 @@
 {
-  "updated": "2026-07-24T20:48:28.794Z",
+  "updated": "2026-07-25T01:43:47.499Z",
   "feeds": {
     "conflict": {
       "label": "Conflict Wire (GDELT)",
-      "ok": false,
-      "count": 0,
-      "ms": 35328,
-      "updated": null,
-      "source": "",
-      "error": "Unexpected token 'P', \"Please lim\"... is not valid JSON",
-      "lastTried": "2026-07-24T20:48:21.722Z"
+      "ok": true,
+      "count": 131,
+      "ms": 15227,
+      "updated": "2026-07-25T01:43:01.103Z",
+      "source": "GDELT 2.0 DOC API (free, no key)",
+      "error": null
     },
     "news": {
       "label": "News Desks (RSS)",
       "ok": true,
       "count": 40,
-      "ms": 2006,
-      "updated": "2026-07-24T20:48:23.728Z",
+      "ms": 2021,
+      "updated": "2026-07-25T01:43:03.125Z",
       "source": "RSS: The Hindu, The Wire, Scroll, OCCRP",
       "error": null
     },
@@ -24,8 +23,8 @@
       "label": "Markets (OHLC)",
       "ok": true,
       "count": 8,
-      "ms": 74,
-      "updated": "2026-07-24T20:48:23.803Z",
+      "ms": 84,
+      "updated": "2026-07-25T01:43:03.209Z",
       "source": "Yahoo Finance chart API (delayed, fair-use)",
       "error": null
     },
@@ -33,17 +32,17 @@
       "label": "Parliament Bills (sansad.in)",
       "ok": false,
       "count": 0,
-      "ms": 4991,
+      "ms": 44289,
       "updated": null,
       "source": "",
-      "error": "bills source unreachable/changed — Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON | Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON (verify endpoint against a live sansad.in response)",
-      "lastTried": "2026-07-24T20:48:28.794Z"
+      "error": "bills source unreachable/changed — fetch failed | fetch failed (verify endpoint against a live sansad.in response)",
+      "lastTried": "2026-07-25T01:43:47.499Z"
     }
   },
-  "startedAt": "2026-07-24T20:47:46.394Z",
+  "startedAt": "2026-07-25T01:42:45.877Z",
   "summary": {
     "total": 4,
-    "ok": 2,
-    "failed": 2
+    "ok": 3,
+    "failed": 1
   }
 }
