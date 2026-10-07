@@ -1,22 +1,22 @@
 {
-  "updated": "2026-10-06T21:59:51.082Z",
+  "updated": "2026-10-07T03:11:36.604Z",
   "feeds": {
     "conflict": {
       "label": "Conflict Wire (GDELT)",
       "ok": false,
       "count": 0,
-      "ms": 32057,
+      "ms": 35202,
       "updated": "2026-10-05T12:57:09.667Z",
       "source": "GDELT 2.0 DOC API (free, no key)",
       "error": "Unexpected token 'P', \"Please lim\"... is not valid JSON",
-      "lastTried": "2026-10-06T21:59:44.286Z"
+      "lastTried": "2026-10-07T03:11:29.855Z"
     },
     "news": {
       "label": "News Desks (RSS)",
       "ok": true,
       "count": 40,
-      "ms": 1586,
-      "updated": "2026-10-06T21:59:45.871Z",
+      "ms": 1881,
+      "updated": "2026-10-07T03:11:31.735Z",
       "source": "RSS: The Hindu, The Wire, Scroll, OCCRP",
       "error": null
     },
@@ -24,8 +24,8 @@
       "label": "Markets (OHLC)",
       "ok": true,
       "count": 8,
-      "ms": 266,
-      "updated": "2026-10-06T21:59:46.138Z",
+      "ms": 75,
+      "updated": "2026-10-07T03:11:31.812Z",
       "source": "Yahoo Finance chart API (delayed, fair-use)",
       "error": null
     },
@@ -33,14 +33,14 @@
       "label": "Parliament Bills (sansad.in)",
       "ok": false,
       "count": 0,
-      "ms": 4943,
+      "ms": 4792,
       "updated": null,
       "source": "",
       "error": "bills source unreachable/changed — Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON | Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON (verify endpoint against a live sansad.in response)",
-      "lastTried": "2026-10-06T21:59:51.082Z"
+      "lastTried": "2026-10-07T03:11:36.604Z"
     }
   },
-  "startedAt": "2026-10-06T21:59:12.228Z",
+  "startedAt": "2026-10-07T03:10:54.652Z",
   "summary": {
     "total": 4,
     "ok": 2,
